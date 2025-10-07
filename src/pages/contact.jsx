@@ -52,7 +52,7 @@ const Contact = () => {
       /http(s)?:\/\//i,
       /\[url\]/i,
       /<a href/i,
-      /viagra|cialis|casino|porn/i // Basic spam keywords
+      /viagra|cialis|casino|porn/i
     ];
 
     if (spamPatterns.some(pattern => pattern.test(message) || pattern.test(subject))) {
@@ -62,13 +62,12 @@ const Contact = () => {
     return null;
   };
 
-  // Handle form submission
+  // Handle form submission via formsubmit.co
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (isSubmitting) return;
 
-    // Client-side validation
     const validationError = validateForm();
     if (validationError) {
       setSubmitStatus({ type: 'error', message: validationError });
@@ -79,38 +78,39 @@ const Contact = () => {
     setSubmitStatus(null);
 
     try {
-      // Netlify Forms will handle the submission automatically
-      // We just need to let the form submit naturally
-      const form = e.target;
-      
-      // For Netlify Forms, we can use fetch as an alternative
-      const formData = new FormData(form);
-      
-      const response = await fetch('/', {
+      // Prepare form data for formsubmit.co
+      const formData = new FormData();
+      formData.append('name', formState.name);
+      formData.append('email', formState.email);
+      formData.append('subject', formState.subject);
+      formData.append('message', formState.message);
+
+      // Submit to formsubmit.co endpoint
+      const response = await fetch('https://formsubmit.co/contact@instantbmi.com', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData).toString()
+        body: formData,
+        headers: {
+          Accept: 'application/json'
+        }
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (result.success) {
         setSubmitStatus({ 
           type: 'success', 
           message: 'Thank you! Your message has been sent successfully. We\'ll get back to you soon.' 
         });
         setFormState({ name: '', email: '', subject: '', message: '' });
-        
-        // Reset form
-        if (formRef.current) {
-          formRef.current.reset();
-        }
+        if (formRef.current) formRef.current.reset();
       } else {
-        throw new Error('Submission failed');
+        throw new Error(result.message || 'Submission failed');
       }
     } catch (error) {
       console.error('Form submission error:', error);
       setSubmitStatus({ 
         type: 'error', 
-        message: 'Sorry, there was an error sending your message. Please try again or contact us directly at support@instantbmi.com' 
+        message: 'Sorry, there was an error sending your message. Please try again or email us directly at contact@instantbmi.com' 
       });
     } finally {
       setIsSubmitting(false);
@@ -119,29 +119,20 @@ const Contact = () => {
 
   return (
     <>
-      {/* === SEO & Metadata with Next.js Head === */}
       <Head>
-        {/* Page Title */}
         <title>Contact Us | InstantBMI.com - Get In Touch</title>
-
-        {/* Meta Description */}
         <meta
           name="description"
           content="Contact InstantBMI.com team. We're here to help with any questions about our free, private BMI calculator and health tools."
         />
-
-        {/* Keywords */}
         <meta
           name="keywords"
           content="contact BMI calculator, get in touch, health tools support, privacy-focused tools, feedback BMI calculator"
         />
-
-        {/* Author & Indexing */}
         <meta name="author" content="InstantBMI.com" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://www.instantbmi.com/contact" />
 
-        {/* Open Graph Tags */}
         <meta property="og:title" content="Contact Us | InstantBMI.com" />
         <meta
           property="og:description"
@@ -153,7 +144,6 @@ const Contact = () => {
         <meta property="og:image:alt" content="Contact InstantBMI.com Team" />
         <meta property="og:site_name" content="InstantBMI.com" />
 
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@yourhandle" />
         <meta name="twitter:title" content="Contact InstantBMI.com" />
@@ -163,7 +153,6 @@ const Contact = () => {
         />
         <meta name="twitter:image" content="https://www.instantbmi.com/images/og-contact.jpg" />
 
-        {/* Structured Data (JSON-LD) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -186,17 +175,12 @@ const Contact = () => {
             })
           }}
         />
-
-        {/* Viewport */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* === Main Component === */}
       <main className={styles.contactPage}>
         <div className={styles.contactContainer}>
           <div className={styles.contactCard}>
-            
-            {/* Header Section */}
             <header className={styles.contactHeader}>
               <h1 className={styles.contactTitle}>Get In Touch</h1>
               <p className={styles.contactSubtitle}>
@@ -204,7 +188,6 @@ const Contact = () => {
               </p>
             </header>
 
-            {/* Status Messages */}
             {submitStatus && (
               <div 
                 className={`${styles.statusMessage} ${
@@ -217,28 +200,12 @@ const Contact = () => {
               </div>
             )}
 
-            {/* Contact Form */}
             <form
               ref={formRef}
-              name="contact"
-              method="POST"
-              data-netlify="true"
-              netlify-honeypot="bot-field"
               className={styles.contactForm}
               onSubmit={handleSubmit}
               noValidate
             >
-              {/* Netlify Forms Hidden Input */}
-              <input type="hidden" name="form-name" value="contact" />
-              
-              {/* Netlify Bot Field */}
-              <div className={styles.hidden}>
-                <label>
-                  Don't fill this out if you're human: 
-                  <input name="bot-field" />
-                </label>
-              </div>
-
               {/* Name Field */}
               <div className={styles.formGroup}>
                 <label htmlFor="name" className={styles.formLabel}>
@@ -276,7 +243,6 @@ const Contact = () => {
                   placeholder="your.email@example.com"
                   required
                   aria-required="true"
-                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                   value={formState.email}
                   onChange={handleInputChange}
                   disabled={isSubmitting}
@@ -331,7 +297,6 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button 
                 type="submit" 
                 className={`${styles.submitBtn} ${isSubmitting ? styles.submitBtnLoading : ''}`}
@@ -347,7 +312,6 @@ const Contact = () => {
                 )}
               </button>
 
-              {/* Enhanced Privacy Note */}
               <div className={styles.privacyNote}>
                 <p className={styles.formNote}>
                   <strong>Privacy & Security:</strong> Your data is encrypted and secure. 
@@ -357,12 +321,11 @@ const Contact = () => {
               </div>
             </form>
 
-            {/* Alternative Contact Methods */}
             <div className={styles.alternativeContact}>
-        
-              </div>
+              {/* Optional: add direct email link if desired */}
             </div>
           </div>
+        </div>
       </main>
     </>
   );
