@@ -86,7 +86,7 @@ const HomePage = () => {
             <p className={styles.heroSubtitle}>
               Instantly calculate your Body Mass Index
             </p>
-            <Link href="/calculators" className={styles.heroCta}>
+            <Link href="/bmi-calculator-and-more" className={styles.heroCta}>
               Calculate Your BMI Now
             </Link>
           </section>
