@@ -1,0 +1,265 @@
+/* Main Navbar */
+.navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.navbarContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+/* Brand/Logo */
+.navbarBrand {
+  display: flex;
+  align-items: center;
+}
+
+.navbarLogo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a365d;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navbarLogo:hover {
+  color: #2d3748;
+}
+
+/* Desktop Menu */
+.navbarMenu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbarItem {
+  position: relative;
+}
+
+.navbarLink {
+  color: #1a365d;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.navbarLink:hover {
+  color: #2d3748;
+}
+
+.navbarLink[aria-current="page"] {
+  color: #1a365d;
+  font-weight: 600;
+}
+
+.navbarLink[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #1a365d;
+  border-radius: 1px;
+}
+
+/* Mobile Toggle Button */
+.navbarToggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1.5rem;
+  height: 1.125rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bar {
+  height: 2px;
+  width: 100%;
+  background-color: #1a365d;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.bar1Active {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.bar2Active {
+  opacity: 0;
+}
+
+.bar3Active {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Menu Styles */
+@media (max-width: 768px) {
+  .navbarContainer {
+    padding: 0 1rem;
+    height: 3.5rem;
+  }
+
+  .navbarToggle {
+    display: flex;
+  }
+
+  .navbarMenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    flex-direction: column;
+    gap: 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .navbarMenu.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .navbarItem {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbarLink {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f7fafc;
+    width: 100%;
+  }
+
+  .navbarLink:hover {
+    background-color: #f7fafc;
+  }
+
+  .navbarLink[aria-current="page"]::after {
+    display: none;
+  }
+
+  .navbarLink[aria-current="page"] {
+    background-color: #1a365d;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .navbarContainer {
+    padding: 0 0.75rem;
+    height: 3.25rem;
+  }
+
+  .navbarLogo {
+    font-size: 1.125rem;
+  }
+
+  .navbarMenu {
+    padding: 0.75rem 0;
+  }
+
+  .navbarLink {
+    padding: 0.875rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .navbarContainer {
+    padding: 0 0.5rem;
+  }
+
+  .navbarLogo {
+    font-size: 1rem;
+  }
+
+  .navbarToggle {
+    width: 1.375rem;
+    height: 1rem;
+  }
+
+  .bar {
+    height: 1.5px;
+  }
+
+  .bar1Active {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .bar3Active {
+    transform: rotate(-45deg) translate(4px, -4px);
+  }
+}
+
+/* Focus styles for accessibility */
+.navbarToggle:focus-visible {
+  outline: 2px solid #1a365d;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.navbarLink:focus-visible {
+  outline: 2px solid #1a365d;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .navbarLogo,
+  .navbarLink,
+  .bar,
+  .navbarMenu {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navbar {
+    border-bottom: 2px solid #1a365d;
+  }
+
+  .navbarLink[aria-current="page"]::after {
+    height: 3px;
+  }
+
+  .bar {
+    height: 3px;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/about": "pages/about.html",
+  "/bmi-calculator-and-more": "pages/bmi-calculator-and-more.html",
+  "/contact": "pages/contact.html",
+  "/": "pages/index.html",
+  "/privacy-policy": "pages/privacy-policy.html",
+  "/404": "pages/404.html"
+}
