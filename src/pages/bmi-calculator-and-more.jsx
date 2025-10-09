@@ -1,13 +1,18 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import {
+  LineChart, Line, BarChart, Bar, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
+import { Download, Info, TrendingUp, Scale, Activity, Target } from 'lucide-react';
 import styles from './HealthCalculatorHub.module.css';
 
 const HealthCalculatorHub = () => {
   const [activeTab, setActiveTab] = useState('bmi');
   const [saveAllowed, setSaveAllowed] = useState(false);
   const [history, setHistory] = useState({});
+  const chartRef = useRef(null);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -26,6 +31,7 @@ const HealthCalculatorHub = () => {
       ...data,
       id: Date.now(),
       date: new Date().toLocaleDateString(),
+      timestamp: Date.now()
     };
 
     const updatedHistory = {
@@ -52,6 +58,324 @@ const HealthCalculatorHub = () => {
   const clearAllHistory = () => {
     setHistory({});
     localStorage.removeItem('health_calc_history');
+  };
+
+  // BMI Visualization Components
+  const BMIVisualizations = ({ bmi, height, weight, unit, history }) => {
+    if (!bmi) return null;
+
+    // BMI Gauge Data
+    const bmiGaugeData = [
+      { name: 'Underweight', value: 18.5, color: '#63b3ed' },
+      { name: 'Normal', value: 6.5, color: '#48bb78' },
+      { name: 'Overweight', value: 5, color: '#ed8936' },
+      { name: 'Obese', value: 10, color: '#e53e3e' }
+    ];
+
+    // BMI Category Bar Chart Data
+    const bmiCategories = [
+      { category: 'Underweight', range: '<18.5', value: 18.5, color: '#63b3ed' },
+      { category: 'Normal', range: '18.5-24.9', value: 24.9, color: '#48bb78' },
+      { category: 'Overweight', range: '25-29.9', value: 29.9, color: '#ed8936' },
+      { category: 'Obese', range: '30+', value: 40, color: '#e53e3e' }
+    ];
+
+    // BMI Trend Data
+    const bmiTrendData = history?.bmi?.slice().reverse().map((entry, index) => ({
+      week: `Week ${index + 1}`,
+      bmi: entry.bmi,
+      date: entry.date
+    })) || [];
+
+    // Weight vs Height Scatter Data
+    const heightInMeters = unit === 'metric' ? height / 100 : height * 0.0254;
+    const weightInKg = unit === 'metric' ? weight : weight * 0.453592;
+    
+    const scatterData = [
+      { height: heightInMeters, weight: weightInKg, bmi: bmi, type: 'You' },
+      { height: 1.6, weight: 50, bmi: 19.5, type: 'Average' },
+      { height: 1.7, weight: 65, bmi: 22.5, type: 'Average' },
+      { height: 1.8, weight: 75, bmi: 23.1, type: 'Average' },
+      { height: 1.65, weight: 58, bmi: 21.3, type: 'Average' }
+    ];
+
+    // Healthy Weight Range Data
+    const minHealthyWeight = 18.5 * Math.pow(heightInMeters, 2);
+    const maxHealthyWeight = 24.9 * Math.pow(heightInMeters, 2);
+    const healthyWeightData = [
+      { height: heightInMeters - 0.1, min: minHealthyWeight - 5, max: maxHealthyWeight - 5 },
+      { height: heightInMeters, min: minHealthyWeight, max: maxHealthyWeight },
+      { height: heightInMeters + 0.1, min: minHealthyWeight + 5, max: maxHealthyWeight + 5 }
+    ];
+
+    // Body Composition Data
+    const bodyCompositionData = [
+      { name: 'Muscle Mass', value: 40, color: '#4299e1' },
+      { name: 'Body Fat', value: Math.min(30, Math.max(10, (bmi - 20) * 2)), color: '#e53e3e' },
+      { name: 'Bone Density', value: 15, color: '#48bb78' },
+      { name: 'Water', value: 25, color: '#3182ce' }
+    ];
+
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className={styles.customTooltip}>
+            <p>{`${label}`}</p>
+            {payload.map((entry, index) => (
+              <p key={index} style={{ color: entry.color }}>
+                {`${entry.name}: ${entry.value}`}
+              </p>
+            ))}
+          </div>
+        );
+      }
+      return null;
+    };
+
+    const downloadReport = () => {
+      const reportContent = `
+BMI Report
+Generated on: ${new Date().toLocaleDateString()}
+
+Personal Information:
+- Height: ${height} ${unit === 'metric' ? 'cm' : 'inches'}
+- Weight: ${weight} ${unit === 'metric' ? 'kg' : 'lbs'}
+- BMI: ${bmi}
+- Category: ${bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight' : bmi < 30 ? 'Overweight' : 'Obese'}
+
+Healthy Weight Range for your height:
+- Minimum: ${minHealthyWeight.toFixed(1)} kg
+- Maximum: ${maxHealthyWeight.toFixed(1)} kg
+
+Recommendations:
+${bmi < 18.5 ? '- Consider nutritional consultation for healthy weight gain' : 
+  bmi < 25 ? '- Excellent! Maintain balanced diet and regular activity' :
+  bmi < 30 ? '- Consider lifestyle adjustments. Even 5-10% weight loss improves health' :
+  '- Consult healthcare provider. Focus on sustainable changes'}
+      `.trim();
+
+      const blob = new Blob([reportContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bmi-report-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
+    return (
+      <div className={styles.visualizationSection}>
+        <div className={styles.visualizationHeader}>
+          <h3>BMI Visualizations</h3>
+          <button className={styles.downloadBtn} onClick={downloadReport}>
+            <Download size={16} />
+            Download Report
+          </button>
+        </div>
+
+        <div className={styles.chartGrid}>
+          {/* BMI Gauge */}
+          <div className={styles.chartContainer}>
+            <div className={styles.chartHeader}>
+              <Scale size={18} />
+              <h4>BMI Gauge</h4>
+              <div className={styles.tooltipWrapper}>
+                <Info size={14} />
+                <div className={styles.tooltip}>
+                  Shows your BMI position on the health scale with color-coded zones
+                </div>
+              </div>
+            </div>
+            <div className={styles.gaugeContainer}>
+              <div className={styles.gauge}>
+                <div 
+                  className={styles.gaugeNeedle}
+                  style={{ 
+                    transform: `rotate(${((bmi / 40) * 180) - 90}deg)`,
+                    backgroundColor: bmi < 18.5 ? '#63b3ed' : bmi < 25 ? '#48bb78' : bmi < 30 ? '#ed8936' : '#e53e3e'
+                  }}
+                ></div>
+                <div className={styles.gaugeLabels}>
+                  <span>Underweight</span>
+                  <span>Normal</span>
+                  <span>Overweight</span>
+                  <span>Obese</span>
+                </div>
+              </div>
+              <div className={styles.gaugeValue}>
+                <span className={styles.gaugeNumber}>{bmi}</span>
+                <span className={styles.gaugeCategory}>
+                  {bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* BMI Category Bar Chart */}
+          <div className={styles.chartContainer}>
+            <div className={styles.chartHeader}>
+              <Activity size={18} />
+              <h4>BMI Categories</h4>
+              <div className={styles.tooltipWrapper}>
+                <Info size={14} />
+                <div className={styles.tooltip}>
+                  Compares your BMI across different health categories
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={bmiCategories}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="category" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar 
+                  dataKey="value" 
+                  fill="#8884d8"
+                  background={{ fill: '#f0f0f0' }}
+                >
+                  {bmiCategories.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.color}
+                      opacity={bmi >= (index === 0 ? 0 : bmiCategories[index-1].value) && bmi <= entry.value ? 1 : 0.6}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* BMI Trend Line */}
+          {bmiTrendData.length > 1 && (
+            <div className={styles.chartContainer}>
+              <div className={styles.chartHeader}>
+                <TrendingUp size={18} />
+                <h4>BMI Trend</h4>
+                <div className={styles.tooltipWrapper}>
+                  <Info size={14} />
+                  <div className={styles.tooltip}>
+                    Tracks your BMI changes over time
+                  </div>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={bmiTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="week" />
+                  <YAxis />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line type="monotone" dataKey="bmi" stroke="#8884d8" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Weight vs Height Scatter Plot */}
+          <div className={styles.chartContainer}>
+            <div className={styles.chartHeader}>
+              <Target size={18} />
+              <h4>Weight vs Height</h4>
+              <div className={styles.tooltipWrapper}>
+                <Info size={14} />
+                <div className={styles.tooltip}>
+                  Shows relationship between weight and height with BMI contours
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <ScatterChart data={scatterData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="height" name="Height" unit="m" />
+                <YAxis dataKey="weight" name="Weight" unit="kg" />
+                <Tooltip content={<CustomTooltip />} />
+                <Scatter dataKey="bmi" fill="#8884d8">
+                  {scatterData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.type === 'You' ? '#e53e3e' : '#63b3ed'}
+                    />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Healthy Weight Range */}
+          <div className={styles.chartContainer}>
+            <div className={styles.chartHeader}>
+              <Scale size={18} />
+              <h4>Healthy Weight Range</h4>
+              <div className={styles.tooltipWrapper}>
+                <Info size={14} />
+                <div className={styles.tooltip}>
+                  Shows healthy weight range for your height
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={healthyWeightData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="height" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Area 
+                  dataKey="max" 
+                  stackId="1" 
+                  stroke="#48bb78" 
+                  fill="#48bb78" 
+                  fillOpacity={0.6}
+                  name="Max Healthy"
+                />
+                <Area 
+                  dataKey="min" 
+                  stackId="1" 
+                  stroke="#63b3ed" 
+                  fill="#63b3ed" 
+                  fillOpacity={0.6}
+                  name="Min Healthy"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Body Composition */}
+          <div className={styles.chartContainer}>
+            <div className={styles.chartHeader}>
+              <Activity size={18} />
+              <h4>Body Composition</h4>
+              <div className={styles.tooltipWrapper}>
+                <Info size={14} />
+                <div className={styles.tooltip}>
+                  Estimated body composition breakdown
+                </div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={bodyCompositionData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {bodyCompositionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // BMI Calculator
@@ -96,13 +420,13 @@ const HealthCalculatorHub = () => {
 
       if (calculatedBmi < 18.5) {
         setBmiCategory('Underweight');
-        setBmiColor('#ed8936');
+        setBmiColor('#63b3ed');
       } else if (calculatedBmi < 25) {
         setBmiCategory('Normal weight');
-        setBmiColor('#38a169');
+        setBmiColor('#48bb78');
       } else if (calculatedBmi < 30) {
         setBmiCategory('Overweight');
-        setBmiColor('#ecc94b');
+        setBmiColor('#ed8936');
       } else {
         setBmiCategory('Obese');
         setBmiColor('#e53e3e');
@@ -211,6 +535,14 @@ const HealthCalculatorHub = () => {
                 <span>Obese</span>
               </div>
             </div>
+
+            <BMIVisualizations 
+              bmi={bmi} 
+              height={height} 
+              weight={weight} 
+              unit={unit}
+              history={history}
+            />
 
             <div className={styles.adviceSection}>
               <h4>Interpretation</h4>
@@ -878,9 +1210,9 @@ const HealthCalculatorHub = () => {
           name="keywords"
           content="BMI calculator, body fat calculator, BMR calculator, VO2 max calculator, one-rep max, health calculators, fitness calculators"
         />
-        <meta name="author" content="BMICalculatorAndMore" />
+        <meta name="author" content="InstantBMI" />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.bmicalculatorandmore.com/calculators" />
+        <link rel="canonical" href="https://www.instantbmi.com/calculators" />
 
         <meta property="og:title" content="Health Calculators Hub | Free Fitness & Health Tools" />
         <meta
@@ -888,8 +1220,8 @@ const HealthCalculatorHub = () => {
           content="Complete suite of free health calculators: BMI, body fat, BMR, VO2 Max, and more. 100% private and secure."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.bmicalculatorandmore.com/calculators" />
-        <meta property="og:image" content="https://www.bmicalculatorandmore.com/images/og-calculators.jpg" />
+        <meta property="og:url" content="https://www.instantbmi.com/calculators" />
+        <meta property="og:image" content="https://www.instantbmi.com/images/og-calculators.jpg" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Free Health Calculators Hub" />
@@ -897,7 +1229,7 @@ const HealthCalculatorHub = () => {
           name="twitter:description"
           content="BMI, body fat, BMR, VO2 Max calculators - all free and private."
         />
-        <meta name="twitter:image" content="https://www.bmicalculatorandmore.com/images/og-calculators.jpg" />
+        <meta name="twitter:image" content="https://www.instantbmi.com/images/og-calculators.jpg" />
 
         <script
           type="application/ld+json"
@@ -906,7 +1238,7 @@ const HealthCalculatorHub = () => {
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "Health Calculators Hub",
-              "url": "https://www.bmicalculatorandmore.com/calculators",
+              "url": "https://www.instantbmi.com/calculators",
               "description": "Collection of free health and fitness calculators including BMI, body fat percentage, BMR, VO2 Max, and one-rep max calculators.",
               "applicationCategory": "HealthApplication",
               "operatingSystem": "Any",
