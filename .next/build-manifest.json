@@ -1,64 +1,32 @@
 {
   "polyfillFiles": [
-    "static/chunks/polyfills-42372ed130431b0a.js"
+    "static/chunks/polyfills.js"
   ],
-  "devFiles": [],
+  "devFiles": [
+    "static/chunks/react-refresh.js"
+  ],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/fH1Me39Mp1Yj_urHkLKES/_buildManifest.js",
-    "static/fH1Me39Mp1Yj_urHkLKES/_ssgManifest.js"
+    "static/development/_buildManifest.js",
+    "static/development/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "rootMainFilesTree": {},
   "pages": {
     "/": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/css/9e1f4791385d05b2.css",
-      "static/chunks/pages/index-7b6a264ed9c67e69.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/index.js"
     ],
     "/_app": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/css/19f781ec7a84608a.css",
-      "static/chunks/pages/_app-7c575c4d74c8af82.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_app.js"
     ],
     "/_error": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/chunks/pages/_error-cf5db1610f7a1281.js"
-    ],
-    "/about": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/css/d83dd8e7643055e1.css",
-      "static/chunks/pages/about-922316461d2e827e.js"
-    ],
-    "/bmi-calculator-and-more": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/chunks/755-64600630d2225930.js",
-      "static/css/75c80d1aea0a7a75.css",
-      "static/chunks/pages/bmi-calculator-and-more-27e77c1a2fff92b6.js"
-    ],
-    "/contact": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/css/14efb52f529375bc.css",
-      "static/chunks/pages/contact-bc85f832e4cacae6.js"
-    ],
-    "/privacy-policy": [
-      "static/chunks/webpack-a53428298b814363.js",
-      "static/chunks/framework-b1e5f14688f9ffe6.js",
-      "static/chunks/main-9e5fa961f4622c15.js",
-      "static/css/3b8c735b2d83b6b8.css",
-      "static/chunks/pages/privacy-policy-6ec6377ca4ca62e8.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/_error.js"
     ]
   },
   "ampFirstPages": []
