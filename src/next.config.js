@@ -1,10 +1,15 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Enable static exports for Cloudflare Pages
   output: 'export',
   trailingSlash: true,
-  distDir: 'out',
-  // Add these for better Cloudflare compatibility
   images: {
-    unoptimized: true
+    unoptimized: true // Required for static export
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '.' : '',
+  // Disable server-side features for static export
+  experimental: {
+    esmExternals: true
+  }
 }
+
+module.exports = nextConfig                                                                                                                   
